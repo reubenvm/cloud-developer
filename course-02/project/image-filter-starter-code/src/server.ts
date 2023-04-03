@@ -28,6 +28,37 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
   //   the filtered image file [!!TIP res.sendFile(filteredpath); might be useful]
 
   /**************************************************************************** */
+  app.get("/filteredimage/", async (req, res) => {
+    let { image_url } = req.query;
+
+    if ( !image_url ) {
+      return res.status(400).send('image url is missing from clients request')
+    }
+
+  
+  	if ( !isValidUrl( image_url ) ) {
+      return res.status(404).send('url not found')
+    }
+
+    let location = await filterImageFromURL(image_url)
+    // console.log(location)
+    // res.status(200).send('done')
+    return res.status(200).sendFile(location, () =>{deleteLocalFiles([location])});
+
+  });
+
+
+  function isValidUrl(urlString: string) {
+    var urlPattern = new RegExp('^(https?:\\/\\/)?'+ // validate protocol
+    '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // validate domain name
+    '((\\d{1,3}\\.){3}\\d{1,3}))'+ // validate OR ip (v4) address
+    '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // validate port and path
+    '(\\?[;&a-z\\d%_.~+=-]*)?'+ // validate query string
+    '(\\#[-a-z\\d_]*)?$','i'); // validate fragment locator
+    return !!urlPattern.test(urlString);
+  }
+
+
 
   //! END @TODO1
   
